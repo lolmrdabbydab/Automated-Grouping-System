@@ -1,4 +1,4 @@
-function [groupTable] = comANDSep1(groupTable, nameList, combineMatrix, separateMatrix)
+function [groupTable] = comANDSep2(groupTable, nameList, combineMatrix, separateMatrix)
 
     % Take first combine team from combineMatrix and store it into a list
     firstTeam = combineMatrix(1, :);
@@ -39,7 +39,7 @@ function [groupTable] = comANDSep1(groupTable, nameList, combineMatrix, separate
                 % If the group isn't empty
                 if spaceLeft < length(groupTable(:, groupIndex))
                 
-                    % Iterate through all separate team
+                     % Iterate through all separate team
                     for i = 1:size(separateMatrix, 1)
                         
                         % Record number of members in Combine Team that's in that Separate Team
@@ -56,32 +56,39 @@ function [groupTable] = comANDSep1(groupTable, nameList, combineMatrix, separate
                         if (teamInSepCount == 1) && (groupInSepCount == 1)
                             
                             % Removed Group from groupCanJoin
-                            groupCanJoin = groupCanJoin(1 : end-1);
+                            groupCanJoin = groupCanJoin(1 : end-1); 
                         end
                     end
                 end
             end
         end
-    
-        % Display teamCom and groupCanJoin for testing
-        fprintf("Combine Team: ");
-        disp(teamCom);
-
-        fprintf("Group Can Join: ");
-        disp(groupCanJoin);
         
         % If there's no group the teamCom can fit
+        if isempty(groupCanJoin)
             
             % Display warning message unable to combine the team's members together
+            warnMessage = sprintf(strcat("Unable to Combine ", ...
+                strjoin(teamCom(1:end-1), ", "), " and ", teamCom(end), " together."));
+            warndlg(warnMessage, "Warning")
         
         % If there's group the teamCom can fit
-       
+        else
             % Randomize groupCanJoin list & add the team into it
+            [addToRow, addToGroup] = joinRandomGroup(groupTable, groupCanJoin);
+
+            % Add team to 1st empty position in Group
+            groupTable(addToRow:addToRow + length(teamCom) - 1, addToGroup) = teamCom;
+        end
     end
     
     % Remove individuals added to groupTable from nameList
+    deletePos = ismember(nameList, groupTable);
+    nameList(deletePos) = [];
 
+    % Display nameList for testing
+    fprintf("Name List: ");
+    disp(nameList);
     
     % Call on separate() to add the rest of the individuals in nameList
-
+    
 end
