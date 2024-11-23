@@ -1,4 +1,4 @@
-function [groupTable, useExportCSV] = advance5(eventName)
+function [groupTable, useExportCSV] = advance6(eventName)
        
     % Take user input on whether they want to use Combine/Separate & Export as CSV Feature
     typingTextDisplay(0.02, strcat('Please toggle (on/off) the following features for the "', eventName, ' Event"\n'));
@@ -126,7 +126,6 @@ function [groupTable, useExportCSV] = advance5(eventName)
                         % Break out of com/sep Matrix input loop
                         break;
 
-                    % If the input is not "New" nor "None"
                     otherwise
 
                        % - Limit number of input based on scenario -
@@ -161,6 +160,8 @@ function [groupTable, useExportCSV] = advance5(eventName)
                         % - Make sure user can't input the same name depending on the scenario -
                         % If the user is combining & name input has already been inputted
                         if type == 1 && ismember(individualName, combineMatrix)
+                            
+                            % Set flag to true
                             repeat = true;
                         end
 
@@ -168,7 +169,7 @@ function [groupTable, useExportCSV] = advance5(eventName)
                         % in the team & if name input is already inputted
                         if ((indNum >= 2) && (type == 2)) && (ismember(individualName, separateMatrix(teamNum, :)))
                             
-                            % Set Flag to True
+                            % Set flag to true
                             repeat = true;
                         end
 
@@ -181,13 +182,13 @@ function [groupTable, useExportCSV] = advance5(eventName)
                                 "Please choose another individual.\n", individualName);
                             warndlg(warnMessage, "Warning");
                             
-                            % Reset Flag
+                            % Reset flag
                             repeat = false;
-                            
+
                             % Return to start of while-loop for new input
                             continue;
                         end
-                        
+
                         % If the user is separating & the input per individual cap is reached
                         if (type == 2) && sum(sum(count(separateMatrix, individualName))) == (numGroup - 1)
                             
@@ -244,7 +245,7 @@ function [groupTable, useExportCSV] = advance5(eventName)
 
                             % If flag is true
                             if breakOutLoop
-                                
+
                                 % Reset Flag
                                 breakOutLoop = false;
                                 
@@ -259,25 +260,27 @@ function [groupTable, useExportCSV] = advance5(eventName)
                         else
                             separateMatrix(teamNum, indNum) = individualName;
                         end
-
+                        
                         % Increment indNum by 1 after adding individual
                         indNum = indNum + 1;
                 end 
             end
 
         end
-        disp("Combination Matrix");
-        disp(combineMatrix);
-        
-        disp("Separation Matrix");
-        disp(separateMatrix);
 
-        % Call on a function with necessary parameters to receive the adjusted groupTable
+        % Call on runComORSepFeature() with necessary parameters to receive the adjusted groupTable
+        groupTable = runComORSepFeature(comORSep, groupTable, nameList, combineMatrix, separateMatrix);
 
-        % Store temporary Group Names in groupNameList using for-loop
+        % Create a list to store groupNames
+        groupNameList = [];
 
-        % Change from Matrix to Table Form for better visual & to export as CSV
-        % Add temporary group names to table
+        % Iterate through each group
+        for i = 1:size(groupTable, 2)
+            groupNameList = [groupNameList strcat("Group ", string(i))];
+        end
+
+        % Turn Matrix into Table for better visual, export as CSV & add temporary group names to table
+        groupTable = array2table(groupTable, "VariableNames", groupNameList, "RowNames", {});
     
     % If user don't want to useComORSep
     else
