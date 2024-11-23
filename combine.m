@@ -1,4 +1,4 @@
-function [groupTable] = combine1(groupTable, nameList, combineMatrix)
+function [groupTable] = combine(groupTable, nameList, combineMatrix)
 
     % Store the firstTeam from combineMatrix
     firstTeam = combineMatrix(1, :);
@@ -24,7 +24,7 @@ function [groupTable] = combine1(groupTable, nameList, combineMatrix)
         % Iterate through each group
         for group = 1:size(groupTable, 2)
             
-            % Count empty space in each group
+            % Count empty spaces in each group
             spaceLeft = sum(ismember(groupTable(:, group), "0"));
     
             % If there's enough space for all team member
@@ -45,22 +45,27 @@ function [groupTable] = combine1(groupTable, nameList, combineMatrix)
         else
             % Randomize the group number list & add the team into it
             [addToRow, addToGroup] = joinRandomGroup(groupTable, groupCanFit);
-            groupTable(addToRow:addToRow + length(team) - 1, addToGroup) = team; % Add team to Group
+
+            % Add team to Group
+            groupTable(addToRow:addToRow + length(team) - 1, addToGroup) = team;
         end
     end
     
-    % Randomly add the remaining individual from nameList to Table
-
     % Find position of added individual
+    deletePos = ismember(nameList, groupTable);
     
     % Remove them from nameList
+    nameList(deletePos) = [];
     
     % Shuffle nameList
-
+    nameList = nameList(randperm(length(nameList)));
+    
     % Turn groupTable to a 1D array
-
+    groupTableFlat = groupTable(:);
+    
     % Add remaining names to "0"
-
+    groupTableFlat(ismember(groupTableFlat, "0")) = nameList;
+    
     % Reshape into matrix
-
+    groupTable = reshape(groupTableFlat, size(groupTable)); 
 end
