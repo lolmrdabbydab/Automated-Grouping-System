@@ -1,5 +1,5 @@
-function [groupTable, useExportCSV] = advance1(eventName)
-
+function [groupTable, useExportCSV] = advance2(eventName)
+    
     % Take user input on whether they want to use Combine/Separate & Export as CSV Feature
     typingTextDisplay(0.02, strcat('Please toggle (on/off) the following features for the "', eventName, ' Event"\n'));
     useComORSep = untilCorrectInput("Combination/Separation: ", "s", ["On", "Off"]);
@@ -67,27 +67,58 @@ function [groupTable, useExportCSV] = advance1(eventName)
             end
 
             % Variables
+            indNum = 1;
+            teamNum = 1;
+            newTeam = true;
+            repeat = false;
 
             % Use while-loop to receive correct input for Com/Sep Matrix
+            while true
                 
                 % Display team number when a new team is created
+                if newTeam
+                    typingTextDisplay(0.02, strcat("Individuals in Team No. ", string(teamNum), "\n\n"));
+                    newTeam = false;
+                end
 
                 % Ask for individualName or command to proceed
+                individualName = untilCorrectInput("Individual "+ indNum + "'s Name: ", "s", [nameList "New" "None"]);
 
                 % Check user input
-                % If user input is "New"
-                    
-                    % Call on a function to remove team for either com/sep Matrix with only 1 name
+                switch individualName
+                    case "New" % If user input is "New"
 
-                % If user input is "None"
+                        % Reset Variable
+                        indNum = 1;
+                        teamNum = teamNum + 1;
+                        newTeam = true;
+                        fprintf("\n\n");
 
-                    % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
-                        
+                        % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
+                        if type == 1
+                            combineMatrix = removeInvalidTeam(combineMatrix);
+                        else
+                            separateMatrix = removeInvalidTeam(separateMatrix);
+                        end
+
+                    % If user input is "None"
+                    case "None" 
+                        fprintf("\n\n");
+
+                        % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
+                        if type == 1
+                            combineMatrix = removeInvalidTeam(combineMatrix);
+                        else
+                            separateMatrix = removeInvalidTeam(separateMatrix);
+                        end
+
                         % Break out of com/sep Matrix input loop
+                        break;
 
-                % Else
+                    % If the input is not "New" nor "None"
+                    otherwise
 
-                        % - Limit number of input based on scenario -
+                       % - Limit number of input based on scenario -
                         % If user want to combine more people than a group can house
 
                             % Display input limit warning
@@ -144,9 +175,23 @@ function [groupTable, useExportCSV] = advance1(eventName)
                                         % Display warning that can't separate indivduals inputted to be combine
 
                         % Add individual to correct matrix
+                        if type == 1
+                            combineMatrix(teamNum, indNum) = individualName;
+                        else
+                            separateMatrix(teamNum, indNum) = individualName;
+                        end
 
                         % Increment indNum by 1 after adding individual
+                        indNum = indNum + 1;
+                end 
+            end
+
         end
+        disp("Combine Matrix");
+        disp(combineMatrix);
+        
+        disp("Separate Matrix");
+        disp(separateMatrix);
 
         % Call on a function with necessary parameters to receive the adjusted groupTable
 
@@ -155,9 +200,9 @@ function [groupTable, useExportCSV] = advance1(eventName)
         % Change from Matrix to Table Form for better visual & to export as CSV
         % Add temporary group names to table
     
-        % If user don't want to useComORSep
+    % If user don't want to useComORSep
     else
-    
+        
         % Get the groupTable from simple()
         groupTable = simple();
     end
