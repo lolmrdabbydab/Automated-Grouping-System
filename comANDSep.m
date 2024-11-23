@@ -1,4 +1,4 @@
-function [groupTable] = comANDSep2(groupTable, nameList, combineMatrix, separateMatrix)
+function [groupTable] = comANDSep(groupTable, nameList, combineMatrix, separateMatrix)
 
     % Take first combine team from combineMatrix and store it into a list
     firstTeam = combineMatrix(1, :);
@@ -26,9 +26,9 @@ function [groupTable] = comANDSep2(groupTable, nameList, combineMatrix, separate
             
             % Identify each group
             group = groupTable(:, groupIndex);
-
+             
             % Record the amount of empty space in each group
-            spaceLeft = sum(ismember(groupTable(:, groupIndex), "0"));
+            spaceLeft = sum(ismember(groupTable(:, groupIndex), "0")); 
     
             % If that group has enough space for the Combine Team
             if length(teamCom) <= spaceLeft
@@ -39,7 +39,7 @@ function [groupTable] = comANDSep2(groupTable, nameList, combineMatrix, separate
                 % If the group isn't empty
                 if spaceLeft < length(groupTable(:, groupIndex))
                 
-                     % Iterate through all separate team
+                    % Iterate through all separate team
                     for i = 1:size(separateMatrix, 1)
                         
                         % Record number of members in Combine Team that's in that Separate Team
@@ -56,7 +56,7 @@ function [groupTable] = comANDSep2(groupTable, nameList, combineMatrix, separate
                         if (teamInSepCount == 1) && (groupInSepCount == 1)
                             
                             % Removed Group from groupCanJoin
-                            groupCanJoin = groupCanJoin(1 : end-1); 
+                            groupCanJoin = groupCanJoin(1 : end-1);
                         end
                     end
                 end
@@ -81,14 +81,12 @@ function [groupTable] = comANDSep2(groupTable, nameList, combineMatrix, separate
         end
     end
     
-    % Remove individuals added to groupTable from nameList
+    % Identify the individuals that has been added to groupTable
     deletePos = ismember(nameList, groupTable);
+    
+    % Remove individuals added to groupTable from nameList
     nameList(deletePos) = [];
-
-    % Display nameList for testing
-    fprintf("Name List: ");
-    disp(nameList);
     
-    % Call on separate() to add the rest of the individuals in nameList
-    
+    % Call on separate() to add the rest of the individuals from nameList to groupTable
+    groupTable = separate(groupTable, nameList, separateMatrix);
 end
