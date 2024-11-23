@@ -1,5 +1,5 @@
-function [groupTable, useExportCSV] = advance2(eventName)
-    
+function [groupTable, useExportCSV] = advance3(eventName)
+       
     % Take user input on whether they want to use Combine/Separate & Export as CSV Feature
     typingTextDisplay(0.02, strcat('Please toggle (on/off) the following features for the "', eventName, ' Event"\n'));
     useComORSep = untilCorrectInput("Combination/Separation: ", "s", ["On", "Off"]);
@@ -86,7 +86,9 @@ function [groupTable, useExportCSV] = advance2(eventName)
 
                 % Check user input
                 switch individualName
-                    case "New" % If user input is "New"
+                    
+                    % If user input is "New"
+                    case "New"
 
                         % Reset Variable
                         indNum = 1;
@@ -102,7 +104,7 @@ function [groupTable, useExportCSV] = advance2(eventName)
                         end
 
                     % If user input is "None"
-                    case "None" 
+                    case "None"
                         fprintf("\n\n");
 
                         % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
@@ -115,23 +117,36 @@ function [groupTable, useExportCSV] = advance2(eventName)
                         % Break out of com/sep Matrix input loop
                         break;
 
-                    % If the input is not "New" nor "None"
                     otherwise
 
                        % - Limit number of input based on scenario -
                         % If user want to combine more people than a group can house
+                        if (type == 1) && (indNum > numIndPerGroup)
 
                             % Display input limit warning
-
+                            warnMessage = sprintf("You can't combine " + indNum + ...
+                                " people into a group of " + numIndPerGroup + ...
+                                ". Previous inputs can't be revoke. " + ...
+                                "Please enter 'new' or 'none' to proceed.\n");
+                            warndlg(warnMessage, "Warning");
+                            
                             % Return to start of while-loop for new input
+                            continue;
                         
-
                         % If user want to separate more people from each other
                         % than the amount of groups there are
+                        elseif (type == 2) && (indNum > numGroup)
 
                             % Display input limit warning
+                            warnMessage = sprintf("You can't separate " + indNum +...
+                                " people into " + numGroup + " groups. " + ...
+                                "Previous inputs can't be revoke. " + ...
+                                "Please enter 'new' or 'none' to proceed.\n");
+                            warndlg(warnMessage, "Warning");
 
                             % Return to start of while-loop for new input
+                            continue;
+                        end
 
                         
                         % - Make sure user can't input the same name depending on the scenario -
