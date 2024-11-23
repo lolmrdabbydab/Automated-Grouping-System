@@ -1,0 +1,54 @@
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+Note: Because the unique functionality of Group_Algorithm is storing returned groupTable, displaying it with 
+a Title and allowing user to add groups name if they choose the advance setting, we're not going to check or
+test it's ability to randomly generate a table or combine or separate individuals because that's the 
+functionality of simple() and advance() that has been tested in their respective Driver File. 
+---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- ---------- 
+
+-= Test Functionality =- (Simple Chosen)
+
+Input: no simple 3 3 john cindy ken mike rick hans luke fillip ian
+Expected Output: Title -= Grouping Table =- and groupTable correctly returned and displayed with group names Group 1 to Group 3.
+Actual Output: 
+
+        -= Grouping Table =-
+
+    Group 1    Group 2    Group 3 
+    _______    _______    ________
+
+    "Mike"     "John"     "Hans"  
+    "Bach"     "Cindy"    "Ken"   
+    "Luke"     "Rick"     "Fillip"
+
+
+
+------------------------------------------------------------------------------------------------------------------
+
+
+
+-= Test Functionality =- (Advance Chosen, useExportCSV Off)
+
+Input: no advance off easter on off 3 3 john cindy ken mike rick hans luke fillip ian combine rick hans none friends housemates professionals
+Expected Output: Title -= Easter Event Preview =- and groupTable correctly returned and displayed with group names "Friends", "Housemates" & "Professionals"
+Actual Output:
+    
+    	-= Easter Event Preview =-
+
+    Friends     Housemates    Professionals
+    ________    __________    _____________
+
+    "Rick"        "Ken"          "Ian"     
+    "Hans"        "Luke"         "John"    
+    "Fillip"      "Mike"         "Cindy"   
+
+
+
+------------------------------------------------------------------------------------------------------------------
+
+
+
+-= Test Functionality =- (Advance Chosen, useExportCSV On)
+
+Input: no advance off easter on on 3 3 john cindy ken mike rick hans luke fillip ian combine rick hans none friends housemates professionals
+Expected Output: A downloaded CSV file called Easter.csv with groupTable's correct data where each group names are "Friends", "Housemates" & "Professionals", respectively.
+Actual Output: A downloaded CSV file called Easter.cvs with groupTable's correct data where each group names are "Friends", "Housemates" & "Professionals", respectively.
