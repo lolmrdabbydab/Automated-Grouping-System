@@ -1,5 +1,7 @@
-function [groupTable, useExportCSV] = advance7(eventName)
-       
+function [groupTable, useExportCSV] = advance(eventName)
+
+    clc;
+    
     % Take user input on whether they want to use Combine/Separate & Export as CSV Feature
     typingTextDisplay(0.02, strcat('Please toggle (on/off) the following features for the "', eventName, ' Event"\n'));
     useComORSep = untilCorrectInput("Combination/Separation: ", "s", ["On", "Off"]);
@@ -20,9 +22,7 @@ function [groupTable, useExportCSV] = advance7(eventName)
         
         % Explain Input System
         typingTextDisplay(0.02, "Initializing Combination/Separation Feature");
-
         typingTextDisplay(1, " ...");
-
         typingTextDisplay(0.02, ['\n\n\t' ...
             '- Input Instruction -' ...
             '\n' ...
@@ -34,19 +34,23 @@ function [groupTable, useExportCSV] = advance7(eventName)
             '\n' ...
             'The input format for separation is the same.' ...
             '\n\n']);
-
         separationLine();
 
         % Ask which feature is the user want to use
         comORSep = untilCorrectInput('Select the feature you will use (Combine/Separate/Both): ', "s", ["Combine", "Separate", "Both"]);
         
-        % Check which feature is selected
+        % Check which feature is selected & set loop variables
+        % If the user wants to combine
         if comORSep == "Combine"
             start = 1;
             stop = 1;
+        
+        % If the user wants to separate
         elseif comORSep == "Separate"
             start = 2;
             stop = 2;
+        
+        % If the user wants both combine & separate
         else
             start = 1;
             stop = 2;
@@ -65,11 +69,12 @@ function [groupTable, useExportCSV] = advance7(eventName)
             indNum = 1;
             teamNum = 1;
             newTeam = true;
-            repeat = false;
-            breakOutLoop = false;
 
             % Use while-loop to receive correct input for Com/Sep Matrix
             while true
+
+                % Flag
+                invalidSeparation = false;
                 
                 % Display team number when a new team is created
                 if newTeam
@@ -97,36 +102,110 @@ function [groupTable, useExportCSV] = advance7(eventName)
                             continue;
                         end
 
-                        % Reset Variable
+                        % If the user is combining
+                        if type == 1
+                            
+                            % Call removeInvalidTeam to remove current team if there's less than 2 names in it
+                            combineMatrix = removeInvalidTeam(combineMatrix);
+
+                            % If the returned combineMatrix is empty
+                            if isempty(combineMatrix)
+                                
+                                % Reset Variable
+                                indNum = 1;
+                                newTeam = true;
+
+                                % Display Insufficient Inputs Warning Message
+                                warnMessage = sprintf("\nThe amount of name entered into Team No. %d is insufficient to combine.\n" + ...
+                                    "Please enter at least 2 individual's name.\n", teamNum);
+                                warndlg(warnMessage, "Warning");
+                                fprintf("\n\n");
+                                
+                                % Return to top of while-loop
+                                continue;
+                            end
+                        
+                        % If the user is separating
+                        else
+                            % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
+                            separateMatrix = removeInvalidTeam(separateMatrix);
+                            
+                            % If separateMatrix is empty
+                            if isempty(separateMatrix)
+                                
+                                % Reset Variable
+                                indNum = 1;
+                                newTeam = true;
+
+                                % Display Warning Message That The List Can't Be Empty
+                                warnMessage = sprintf("\nThe amount of name entered into Team No. %d is insufficient to separate.\n" + ...
+                                    "Please enter at least 2 individual's name.\n", teamNum);
+                                warndlg(warnMessage, "Warning");
+                                fprintf("\n\n");
+                                
+                                % Return to top of while-loop
+                                continue;
+                            end
+                        end
+
+                        % Reset Variable & Increase Team Count
                         indNum = 1;
                         teamNum = teamNum + 1;
                         newTeam = true;
                         fprintf("\n\n");
 
-                        % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
-                        if type == 1
-                            combineMatrix = removeInvalidTeam(combineMatrix);
-                        else
-                            separateMatrix = removeInvalidTeam(separateMatrix);
-                        end
-
                     % If user input is "None"
                     case "None"
-                        fprintf("\n\n");
-
-                        % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
+                        
+                        % If the user is combining
                         if type == 1
+                            
+                            % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
                             combineMatrix = removeInvalidTeam(combineMatrix);
-                        else
-                            separateMatrix = removeInvalidTeam(separateMatrix);
-                        end
 
+                            % If combineMatrix is empty
+                            if isempty(combineMatrix)
+                                
+                                % Reset Variable
+                                indNum = 1;
+
+                                % Display Warning Message That It Can't Be Empty
+                                warnMessage = sprintf("\nThe amount of name entered into Combination List is insufficient to combine.\n" + ...
+                                    "Please enter at least 2 individual's name.\n");
+                                warndlg(warnMessage, "Warning");
+                                
+                                % Return to top of while-loop
+                                continue;
+                            end
+                        
+                        % If the user is separating
+                        else
+                            % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
+                            separateMatrix = removeInvalidTeam(separateMatrix);
+                            
+                            % If separateMatrix is empty
+                            if isempty(separateMatrix)
+                                
+                                % Reset Variable
+                                indNum = 1;
+
+                                % Display Warning Message That The List Can't Be Empty
+                                warnMessage = sprintf("\nThe amount of name entered into Separation List is insufficient to separate.\n" + ...
+                                    "Please enter at least 2 individual's name.\n");
+                                warndlg(warnMessage, "Warning");
+                                 
+                                % Return to top of while-loop
+                                continue;
+                            end
+                        end
+                        
                         % Break out of com/sep Matrix input loop
+                        fprintf("\n\n");
                         break;
 
+                    % If the input is not "New" nor "None"
                     otherwise
-
-                       % - Limit number of input based on scenario -
+                        % - Limit number of input based on scenario -
                         % If user want to combine more people than a group can house
                         if (type == 1) && (indNum > numIndPerGroup)
 
@@ -138,7 +217,7 @@ function [groupTable, useExportCSV] = advance7(eventName)
                             warndlg(warnMessage, "Warning");
                             
                             % Return to start of while-loop for new input
-                            continue; 
+                            continue;
                         
                         % If user want to separate more people from each other
                         % than the amount of groups there are
@@ -156,23 +235,10 @@ function [groupTable, useExportCSV] = advance7(eventName)
                         end
                         
                         % - Make sure user can't input the same name depending on the scenario -
-                        % If the user is combining & name input has already been inputted
-                        if type == 1 && ismember(individualName, combineMatrix)
-                            
-                            % Set Flag to True
-                            repeat = true;
-                        end
-
-                        % If user is separating & there's one or more individuals 
-                        % in the team & if name input is already inputted
-                        if ((indNum >= 2) && (type == 2)) && (ismember(individualName, separateMatrix(teamNum, :)))
-                            
-                            % Set Flag to True
-                            repeat = true;
-                        end
-
-                        % If repeated input error found
-                        if repeat
+                        % If the user is combining & name input has already
+                        % been inputted OR if user is separating & there's one or more individuals 
+                        % in the team and that the name input is already inputted
+                        if (type == 1 && ismember(individualName, combineMatrix)) || (indNum >= 2 && type == 2 && ismember(individualName, separateMatrix(teamNum, :)))
                             
                             % Display repeated input warning
                             warnMessage = sprintf("%s has already been added." + ...
@@ -180,13 +246,11 @@ function [groupTable, useExportCSV] = advance7(eventName)
                                 "Please choose another individual.\n", individualName);
                             warndlg(warnMessage, "Warning");
                             
-                            % Reset Flag
-                            repeat = false;
-                            
-                            % Return to start of while-loop for new input
+                             % Return to start of while-loop for new input
                             continue;
                         end
-                        
+
+
                         % If the user is separating & the input per individual cap is reached
                         if (type == 2) && sum(sum(count(separateMatrix, individualName))) == (numGroup - 1)
                             
@@ -205,36 +269,25 @@ function [groupTable, useExportCSV] = advance7(eventName)
                         % separating & the input individual is not the 1st individual
                         if ((comORSep == "Both") && (type == 2)) && (indNum >= 2)
                             
-                            % Put individual's potential teammate into a list
+                            % Put individual's Separate Teammate into a list
                             teamMateList = separateMatrix(teamNum, :);
 
                             % Make every 1x2 possible combination between every teammate & new individual 
                             for i = 1:length(teamMateList)
                                 teammate = teamMateList(i);
                                 pair = [individualName teammate];
-                                
-                                % Iterate through every row of combineMatrix
-                                for row = 1:size(combineMatrix, 1)
-                                    
-                                    % If both individuals are in the same combine team
-                                    if sum(ismember(pair, combineMatrix(row, :))) == 2
 
-                                        % Display warning that can't separate indivduals inputted to be combine
-                                        warnMessage = sprintf("You can't separate %s and %s because " + ...
-                                            "they've been inputted to be group together.\n" + ...
-                                            "Please choose another individual.\n", individualName, teammate);
-                                        warndlg(warnMessage, "Warning");
-                                        
-                                        % Flag to break from nested for-loop to get to while-loop
-                                        breakOutLoop = true;
-                                        
-                                        % Break out of for-loop
-                                        break;
-                                    end
-                                end
-                                
-                                % If flag is true
-                                if breakOutLoop
+                                % If both individuals are in the same combine team
+                                if ~isempty(find(sum(ismember(combineMatrix, pair), 2) == 2))
+
+                                    % Display warning that can't separate indivduals inputted to be combine
+                                    warnMessage = sprintf("You can't separate %s and %s because " + ...
+                                        "they've been inputted to be group together.\n" + ...
+                                        "Please choose another individual.\n", individualName, teammate);
+                                    warndlg(warnMessage, "Warning");
+                                    
+                                    % Set flag to True
+                                    invalidSeparation = true;
                                     
                                     % Break out of for-loop
                                     break;
@@ -242,12 +295,9 @@ function [groupTable, useExportCSV] = advance7(eventName)
                             end
 
                             % If flag is true
-                            if breakOutLoop
+                            if invalidSeparation
                                 
-                                % Reset Flag
-                                breakOutLoop = false;
-                                
-                                % Return to the top of while-loop
+                                % Return to start of while-loop for new input
                                 continue;
                             end
                         end
@@ -258,12 +308,11 @@ function [groupTable, useExportCSV] = advance7(eventName)
                         else
                             separateMatrix(teamNum, indNum) = individualName;
                         end
-                        
+
                         % Increment indNum by 1 after adding individual
                         indNum = indNum + 1;
                 end 
             end
-
         end
 
         % Call on runComORSepFeature() with necessary parameters to receive the adjusted groupTable
@@ -274,9 +323,9 @@ function [groupTable, useExportCSV] = advance7(eventName)
 
         % Iterate through each group
         for i = 1:size(groupTable, 2)
-            
+
             % Store temporary Group Name in groupNameList
-            groupNameList = [groupNameList strcat("Group ", string(i))];
+            groupNameList = [groupNameList strcat("Group ", string(i))]; 
         end
 
         % Turn Matrix into Table for better visual, export as CSV & add temporary group names to table
@@ -284,7 +333,6 @@ function [groupTable, useExportCSV] = advance7(eventName)
     
     % If user don't want to useComORSep
     else
-        
         % Get the groupTable from simple()
         groupTable = simple();
         numGroup = size(groupTable, 2);
@@ -302,12 +350,24 @@ function [groupTable, useExportCSV] = advance7(eventName)
 
         % Ask for groupName input
         groupName = title(input("Enter Name for Group " + group + ": ", "s"));
+        
+        % If groupName has been used, using while-loop, ask until a different name is inputted
+        while (group > 1) && ismember(groupName, groupNameList)
+
+            % Display warning that groupName is already used
+            warnMessage = sprintf("\nGroup Name '%s' Had Already Been Use. " + ...
+                "Please Enter Another Name.\n", groupName);
+            warndlg(warnMessage, "Warning");
+
+            % Ask for another groupName
+            groupName = title(input("Enter Name for Group " + group + ": ", "s"));
+        end
 
         % Add groupName to groupNameList
         groupNameList = [groupNameList groupName];
     end
     
-    % Add new Group Name to Table
+    % Add new Group Names to Table
     groupTable.Properties.VariableNames = groupNameList;
     
     separationLine(55);
