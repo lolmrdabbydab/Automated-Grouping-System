@@ -1,4 +1,4 @@
-function [groupTable, useExportCSV] = advance6(eventName)
+function [groupTable, useExportCSV] = advance7(eventName)
        
     % Take user input on whether they want to use Combine/Separate & Export as CSV Feature
     typingTextDisplay(0.02, strcat('Please toggle (on/off) the following features for the "', eventName, ' Event"\n'));
@@ -94,8 +94,6 @@ function [groupTable, useExportCSV] = advance6(eventName)
                                 "can only be %d separation team. Please enter 'none' to " + ...
                                 "continue.\n", teamNum);
                             warndlg(warnMessage, "Warning");
-                            
-                            % Return to start of while-loop for new input
                             continue;
                         end
 
@@ -140,7 +138,7 @@ function [groupTable, useExportCSV] = advance6(eventName)
                             warndlg(warnMessage, "Warning");
                             
                             % Return to start of while-loop for new input
-                            continue;
+                            continue; 
                         
                         % If user want to separate more people from each other
                         % than the amount of groups there are
@@ -161,7 +159,7 @@ function [groupTable, useExportCSV] = advance6(eventName)
                         % If the user is combining & name input has already been inputted
                         if type == 1 && ismember(individualName, combineMatrix)
                             
-                            % Set flag to true
+                            % Set Flag to True
                             repeat = true;
                         end
 
@@ -169,7 +167,7 @@ function [groupTable, useExportCSV] = advance6(eventName)
                         % in the team & if name input is already inputted
                         if ((indNum >= 2) && (type == 2)) && (ismember(individualName, separateMatrix(teamNum, :)))
                             
-                            % Set flag to true
+                            % Set Flag to True
                             repeat = true;
                         end
 
@@ -182,13 +180,13 @@ function [groupTable, useExportCSV] = advance6(eventName)
                                 "Please choose another individual.\n", individualName);
                             warndlg(warnMessage, "Warning");
                             
-                            % Reset flag
+                            % Reset Flag
                             repeat = false;
-
+                            
                             % Return to start of while-loop for new input
                             continue;
                         end
-
+                        
                         % If the user is separating & the input per individual cap is reached
                         if (type == 2) && sum(sum(count(separateMatrix, individualName))) == (numGroup - 1)
                             
@@ -245,7 +243,7 @@ function [groupTable, useExportCSV] = advance6(eventName)
 
                             % If flag is true
                             if breakOutLoop
-
+                                
                                 % Reset Flag
                                 breakOutLoop = false;
                                 
@@ -271,11 +269,13 @@ function [groupTable, useExportCSV] = advance6(eventName)
         % Call on runComORSepFeature() with necessary parameters to receive the adjusted groupTable
         groupTable = runComORSepFeature(comORSep, groupTable, nameList, combineMatrix, separateMatrix);
 
-        % Create a list to store groupNames
+        % Create a list called groupNameList to store temporary group name
         groupNameList = [];
 
         % Iterate through each group
         for i = 1:size(groupTable, 2)
+            
+            % Store temporary Group Name in groupNameList
             groupNameList = [groupNameList strcat("Group ", string(i))];
         end
 
@@ -287,14 +287,28 @@ function [groupTable, useExportCSV] = advance6(eventName)
         
         % Get the groupTable from simple()
         groupTable = simple();
+        numGroup = size(groupTable, 2);
     end
 
     % Display groupTable and ask user to enter group name
+    typingTextDisplay(0.02, strcat("Please Enter The Name For Each Group For The ", eventName, " Event:\n\n"))
+    disp(groupTable)
     
-    % Ask for group name and store it in groupNameList using for-loop
+    % Create a list called groupNameList to store temporary group name
+    groupNameList = [];
 
-    % Add groupName to groupNameList
+    % Iterate through each group
+    for group = 1:numGroup
+
+        % Ask for groupName input
+        groupName = title(input("Enter Name for Group " + group + ": ", "s"));
+
+        % Add groupName to groupNameList
+        groupNameList = [groupNameList groupName];
+    end
     
     % Add new Group Name to Table
+    groupTable.Properties.VariableNames = groupNameList;
     
+    separationLine(55);
 end
