@@ -1,4 +1,4 @@
-function [groupTable, useExportCSV] = advance4(eventName)
+function [groupTable, useExportCSV] = advance5(eventName)
        
     % Take user input on whether they want to use Combine/Separate & Export as CSV Feature
     typingTextDisplay(0.02, strcat('Please toggle (on/off) the following features for the "', eventName, ' Event"\n'));
@@ -40,18 +40,13 @@ function [groupTable, useExportCSV] = advance4(eventName)
         % Ask which feature is the user want to use
         comORSep = untilCorrectInput('Select the feature you will use (Combine/Separate/Both): ', "s", ["Combine", "Separate", "Both"]);
         
-        % Check which feature is selected & set loop variables
-        % If the user wants to combine
+        % Check which feature is selected
         if comORSep == "Combine"
             start = 1;
             stop = 1;
-        
-        % If the user wants to separate
         elseif comORSep == "Separate"
             start = 2;
             stop = 2;
-        
-        % If the user wants both combine & separate
         else
             start = 1;
             stop = 2;
@@ -71,6 +66,7 @@ function [groupTable, useExportCSV] = advance4(eventName)
             teamNum = 1;
             newTeam = true;
             repeat = false;
+            breakOutLoop = false;
 
             % Use while-loop to receive correct input for Com/Sep Matrix
             while true
@@ -116,8 +112,8 @@ function [groupTable, useExportCSV] = advance4(eventName)
                             separateMatrix = removeInvalidTeam(separateMatrix);
                         end
 
-                    % If user input is "New"
-                    case "None" 
+                    % If user input is "None"
+                    case "None"
                         fprintf("\n\n");
 
                         % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
@@ -130,6 +126,7 @@ function [groupTable, useExportCSV] = advance4(eventName)
                         % Break out of com/sep Matrix input loop
                         break;
 
+                    % If the input is not "New" nor "None"
                     otherwise
 
                        % - Limit number of input based on scenario -
@@ -170,6 +167,8 @@ function [groupTable, useExportCSV] = advance4(eventName)
                         % If user is separating & there's one or more individuals 
                         % in the team & if name input is already inputted
                         if ((indNum >= 2) && (type == 2)) && (ismember(individualName, separateMatrix(teamNum, :)))
+                            
+                            % Set Flag to True
                             repeat = true;
                         end
 
@@ -188,7 +187,7 @@ function [groupTable, useExportCSV] = advance4(eventName)
                             % Return to start of while-loop for new input
                             continue;
                         end
-
+                        
                         % If the user is separating & the input per individual cap is reached
                         if (type == 2) && sum(sum(count(separateMatrix, individualName))) == (numGroup - 1)
                             
@@ -201,21 +200,58 @@ function [groupTable, useExportCSV] = advance4(eventName)
                             % Return to start of while-loop for new input
                             continue;
                         end
-
                         
                         % - Make sure individuals need to separate from each other isn't inputted to combine together -
                         % If user chose to both combine and separate & they're 
                         % separating & the input individual is not the 1st individual
+                        if ((comORSep == "Both") && (type == 2)) && (indNum >= 2)
                             
                             % Put individual's potential teammate into a list
+                            teamMateList = separateMatrix(teamNum, :);
 
                             % Make every 1x2 possible combination between every teammate & new individual 
+                            for i = 1:length(teamMateList)
+                                teammate = teamMateList(i);
+                                pair = [individualName teammate];
                                 
                                 % Iterate through every row of combineMatrix
+                                for row = 1:size(combineMatrix, 1)
                                     
                                     % If both individuals are in the same combine team
+                                    if sum(ismember(pair, combineMatrix(row, :))) == 2
 
                                         % Display warning that can't separate indivduals inputted to be combine
+                                        warnMessage = sprintf("You can't separate %s and %s because " + ...
+                                            "they've been inputted to be group together.\n" + ...
+                                            "Please choose another individual.\n", individualName, teammate);
+                                        warndlg(warnMessage, "Warning");
+                                        
+                                        % Flag to break from nested for-loop to get to while-loop
+                                        breakOutLoop = true;
+                                        
+                                        % Break out of for-loop
+                                        break;
+                                    end
+                                end
+                                
+                                % If flag is true
+                                if breakOutLoop
+                                    
+                                    % Break out of for-loop
+                                    break;
+                                end
+                            end
+
+                            % If flag is true
+                            if breakOutLoop
+                                
+                                % Reset Flag
+                                breakOutLoop = false;
+                                
+                                % Return to the top of while-loop
+                                continue;
+                            end
+                        end
 
                         % Add individual to correct matrix
                         if type == 1
