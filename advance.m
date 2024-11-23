@@ -1,4 +1,4 @@
-function [groupTable, useExportCSV] = advance3(eventName)
+function [groupTable, useExportCSV] = advance4(eventName)
        
     % Take user input on whether they want to use Combine/Separate & Export as CSV Feature
     typingTextDisplay(0.02, strcat('Please toggle (on/off) the following features for the "', eventName, ' Event"\n'));
@@ -90,6 +90,19 @@ function [groupTable, useExportCSV] = advance3(eventName)
                     % If user input is "New"
                     case "New"
 
+                        % If the number of separate team exceed number of groups avaliable
+                        if (type == 2) && (teamNum == numGroup)
+
+                            % Display warning team cap reached
+                            warnMessage = sprintf("Due to program complexity limitations, there " + ...
+                                "can only be %d separation team. Please enter 'none' to " + ...
+                                "continue.\n", teamNum);
+                            warndlg(warnMessage, "Warning");
+                            
+                            % Return to start of while-loop for new input
+                            continue;
+                        end
+
                         % Reset Variable
                         indNum = 1;
                         teamNum = teamNum + 1;
@@ -103,8 +116,8 @@ function [groupTable, useExportCSV] = advance3(eventName)
                             separateMatrix = removeInvalidTeam(separateMatrix);
                         end
 
-                    % If user input is "None"
-                    case "None"
+                    % If user input is "New"
+                    case "None" 
                         fprintf("\n\n");
 
                         % Call removeInvalidTeam to remove team for either com/sep Matrix with only 1 name
@@ -143,36 +156,51 @@ function [groupTable, useExportCSV] = advance3(eventName)
                                 "Previous inputs can't be revoke. " + ...
                                 "Please enter 'new' or 'none' to proceed.\n");
                             warndlg(warnMessage, "Warning");
+                            
+                            % Return to start of while-loop for new input
+                            continue;
+                        end
+                        
+                        % - Make sure user can't input the same name depending on the scenario -
+                        % If the user is combining & name input has already been inputted
+                        if type == 1 && ismember(individualName, combineMatrix)
+                            repeat = true;
+                        end
 
+                        % If user is separating & there's one or more individuals 
+                        % in the team & if name input is already inputted
+                        if ((indNum >= 2) && (type == 2)) && (ismember(individualName, separateMatrix(teamNum, :)))
+                            repeat = true;
+                        end
+
+                        % If repeated input error found
+                        if repeat
+                            
+                            % Display repeated input warning
+                            warnMessage = sprintf("%s has already been added." + ...
+                                "\nPrevious inputs can't be revoke. " + ...
+                                "Please choose another individual.\n", individualName);
+                            warndlg(warnMessage, "Warning");
+                            
+                            % Reset Flag
+                            repeat = false;
+                            
                             % Return to start of while-loop for new input
                             continue;
                         end
 
-                        
-                        % - Make sure user can't input the same name depending on the scenario -
-                        % If the user is combining & name input has already been inputted
-                        
-                            % Define a repeat input error is found
-
-                        % If user is separating & there's one or more individuals 
-                        % in the team & if name input is already inputted
-
-                            % Define a repeat input error is found
-
-                        % If repeated input error found
-
-                            % Display repeated input warning
-
-                            % Reset input error to not found
-
-                            % Return to start of while-loop for new input
-
-
                         % If the user is separating & the input per individual cap is reached
-
-                            % Display input cap reached warning for inputted indivdual
-
+                        if (type == 2) && sum(sum(count(separateMatrix, individualName))) == (numGroup - 1)
+                            
+                            % Display warning input cap reached for inputted indivdual
+                            warnMessage = sprintf("Due to program complexity limitations, %s " + ...
+                                "can only be inputted %d times. Please enter 'new' or 'none' to " + ...
+                                "continue.\n", individualName, numGroup - 1);
+                            warndlg(warnMessage, "Warning");
+                            
                             % Return to start of while-loop for new input
+                            continue;
+                        end
 
                         
                         % - Make sure individuals need to separate from each other isn't inputted to combine together -
@@ -202,10 +230,10 @@ function [groupTable, useExportCSV] = advance3(eventName)
             end
 
         end
-        disp("Combine Matrix");
+        disp("Combination Matrix");
         disp(combineMatrix);
         
-        disp("Separate Matrix");
+        disp("Separation Matrix");
         disp(separateMatrix);
 
         % Call on a function with necessary parameters to receive the adjusted groupTable
